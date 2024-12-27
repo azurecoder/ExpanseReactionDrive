@@ -12,6 +12,6 @@ if __name__ == "__main__":
     sol = Sol()
     earth_orbit = EllipticalOrbit(0.0167, 1.0, 3.0, 365, sol)
     earth = Earth(earth_orbit)  
-    print(earth.get_closest_approach())
-    print(earth.get_farthest_approach())
+    print(f"Closest approach to Earth: {earth.get_closest_approach()}")
+    print(f"Farthest approach from Earth: {earth.get_farthest_approach()}")
     print(earth.get_orbital_distance(36.0)) # February 5th

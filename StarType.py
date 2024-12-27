@@ -63,7 +63,7 @@ class EllipticalOrbit:
         return f"EllipticalOrbit({self._star})"
 
     def __eq__(self, other):
-        return self.e_ccentricity == other.eccentricity and self._semi_major_axis == other.semi_major_axis
+        return self.eccentricity == other.eccentricity and self._semi_major_axis == other.semi_major_axis
 
     @property
     def eccentricity(self): return self._eccentricity
