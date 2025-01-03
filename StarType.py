@@ -49,11 +49,22 @@ class Star:
     def mass(self): return self._solar_mass
 
 class EllipticalOrbit:
-    def __init__(self, eccentricity, semi_major_axis, perihelion_day, period, star: Star):
+    def __init__(self, eccentricity, semi_major_axis, perihelion_day, perihelion_year, period, star):
+        """
+        Initializes an elliptical orbit.
+
+        :param eccentricity: The orbital eccentricity (e).
+        :param semi_major_axis: Semi-major axis of the orbit (in AU).
+        :param perihelion_day: Day of the perihelion in the specified perihelion_year.
+        :param perihelion_year: Year of the perihelion event.
+        :param period: Orbital period (in Earth days).
+        :param star: The star around which the object orbits (must have a name attribute).
+        """
         self._eccentricity = eccentricity
         self._semi_major_axis = semi_major_axis
         self._star = star
         self._perihelion_day = perihelion_day
+        self._perihelion_year = perihelion_year
         self._period = period
 
     def __str__(self):
@@ -63,7 +74,12 @@ class EllipticalOrbit:
         return f"EllipticalOrbit({self._star})"
 
     def __eq__(self, other):
-        return self.eccentricity == other.eccentricity and self._semi_major_axis == other.semi_major_axis
+        return (
+            self.eccentricity == other.eccentricity and 
+            self._semi_major_axis == other.semi_major_axis and
+            self._perihelion_day == other.perihelion_day and
+            self._perihelion_year == other.perihelion_year
+        )
 
     @property
     def eccentricity(self): return self._eccentricity
@@ -78,31 +94,32 @@ class EllipticalOrbit:
     def perihelion_day(self): return self._perihelion_day
 
     @property
+    def perihelion_year(self): return self._perihelion_year
+
+    @property
     def period(self): return self._period
 
-    def get_distance(self, day_of_year: float) -> float:
+    def get_distance(self, day_of_year: float, year: int) -> float:
         """
-        Returns the orbital distance (in AU) from the star at a given day of the year (0–365).
-        
-        We assume:
-          - day_of_year = 0 is Jan 1,
-          - perihelion occurs around day_of_year = 3 (Jan 3).
-        
-        The formula for distance in an elliptical orbit (assuming perihelion at angle = 0):
+        Returns the orbital distance (in AU) from the star at a given day of the year and year.
+
+        The formula for distance in an elliptical orbit:
             r(theta) = a * (1 - e^2) / (1 + e * cos(theta))
-        
-        Here:
-            a = semi-major axis
-            e = eccentricity
-            theta = mean orbital angle from perihelion
+
+        :param day_of_year: Day of the year (0–365).
+        :param year: The calendar year for which the distance is calculated.
+        :return: Distance from the star (in AU).
         """
+        import math
+
+        # Calculate the total elapsed days since the last perihelion
+        days_elapsed = (year - self.perihelion_year) * 365 + (day_of_year - self.perihelion_day)
+
         # Mean motion (radians per day)
         n = 2.0 * math.pi / self.period
 
-        # Shift day_of_year so that day_of_year = self._perihelion_day => theta = 0
-        delta_days = day_of_year - self.perihelion_day
-        # The orbital angle in radians from perihelion
-        theta = n * delta_days
+        # Orbital angle in radians from perihelion
+        theta = n * days_elapsed
 
         # Compute distance using the orbital equation
         a = self._semi_major_axis
@@ -112,34 +129,45 @@ class EllipticalOrbit:
 
     def get_closest_approach(self):
         """
-        Returns a tuple of (day_of_year, distance) for the approximate perihelion.
-        For a simple model with argument_of_perihelion = 0, 
-        perihelion is day_of_year = _perihelion_day, distance = a(1 - e).
+        Returns a tuple of (perihelion_day, perihelion_year, distance) for the perihelion.
         """
         a = self._semi_major_axis
         e = self._eccentricity
         day = self._perihelion_day
+        year = self._perihelion_year
         distance = a * (1 - e)  # Perihelion distance
-        return day, distance
+        return day, year, distance
 
     def get_farthest_approach(self):
         """
-        Returns a tuple of (day_of_year, distance) for the approximate aphelion.
-        In our simplified model, aphelion is about half an orbital period 
-        ( ~182 days ) away from perihelion.
+        Returns a tuple of (day_of_year, year, distance) for the aphelion.
+        Aphelion is approximately half an orbital period (in days) after perihelion.
         """
         a = self._semi_major_axis
         e = self._eccentricity
         # Aphelion occurs about half an orbital period after perihelion
-        day = self._perihelion_day + self.period / 2.0
-        # Wrap day of year to 0–365 range (mod 365)
-        day = day % self.period
+        aphelion_elapsed_days = self.period / 2.0
 
+        # Calculate the aphelion date
+        total_days = self._perihelion_day + aphelion_elapsed_days
+        year_increment = int(total_days // 365)
+        aphelion_day = total_days % 365
+
+        year = self._perihelion_year + year_increment
         distance = a * (1 + e)  # Aphelion distance
-        return day, distance
+        return aphelion_day, year, distance
     
 class Planet:
     def __init__(self, name: str, mass, radius, type: PlanetType, orbit: EllipticalOrbit):
+        """
+        Initializes a planet object.
+
+        :param name: Name of the planet.
+        :param mass: Mass of the planet.
+        :param radius: Radius of the planet.
+        :param type: Type of the planet (e.g., terrestrial, gas giant).
+        :param orbit: Elliptical orbit of the planet.
+        """
         self._name = name
         self._mass = mass
         self._radius = radius
@@ -174,11 +202,28 @@ class Planet:
     @property
     def period(self): return self._orbit.period
 
-    def get_orbital_distance(self, day_of_year: float) -> float:
-        return self._orbit.get_distance(day_of_year)
-    
+    def get_orbital_distance(self, day_of_year: float, year: int) -> float:
+        """
+        Returns the orbital distance from the star on a given day of the year and year.
+
+        :param day_of_year: Day of the year (0-365).
+        :param year: Year for the calculation.
+        :return: Orbital distance (in AU).
+        """
+        return self._orbit.get_distance(day_of_year, year)
+
     def get_closest_approach(self):
+        """
+        Returns the closest approach to the star (perihelion).
+
+        :return: Tuple (perihelion_day, perihelion_year, distance).
+        """
         return self._orbit.get_closest_approach()
-    
+
     def get_farthest_approach(self):
+        """
+        Returns the farthest approach to the star (aphelion).
+
+        :return: Tuple (aphelion_day, aphelion_year, distance).
+        """
         return self._orbit.get_farthest_approach()
