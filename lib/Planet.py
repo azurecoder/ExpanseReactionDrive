@@ -71,3 +71,42 @@ class Planet:
         :return: Tuple (aphelion_day, aphelion_year, distance).
         """
         return self._orbit.get_farthest_approach()
+
+    def find_closest_distance(self, other_planet, time_steps_per_day: int = 24) -> tuple:
+        """
+        Calculate the closest distance to another planet in the future.
+
+        :param other_planet: The Planet instance to calculate the closest distance to.
+        :param time_steps_per_day: Number of steps per day (e.g., 24 for hourly).
+        :return: Tuple (closest_distance_in_AU, day_of_year, year).
+        """
+        from datetime import datetime
+
+        # Get current date
+        today = datetime.now()
+        current_year = today.year
+        current_day_of_year = today.timetuple().tm_yday
+
+        # Use the longer orbital period for iteration
+        farther_period = max(self.period, other_planet.period)
+        closest_distance = float('inf')
+        closest_time = None
+
+        # Start from the current day and year
+        for step in range(int(farther_period * time_steps_per_day)):
+            # Calculate the day and year for the current step
+            day_of_year = (current_day_of_year + (step / time_steps_per_day)) % 365
+            year = current_year + ((current_day_of_year + (step / time_steps_per_day)) // 365)
+
+            # Get distances
+            distance_self = self.get_orbital_distance(day_of_year, year)
+            distance_other = other_planet.get_orbital_distance(day_of_year, year)
+
+            # Compute relative distance
+            relative_distance = abs(distance_self - distance_other)
+
+            if relative_distance < closest_distance:
+                closest_distance = relative_distance
+                closest_time = (day_of_year, year)
+
+        return closest_distance, closest_time
