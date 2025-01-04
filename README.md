@@ -6,6 +6,7 @@ An AI model to help determine spacecraft and orbits in the Expanse Universe
 - orbital map of the solar system in code
 - orbital mechanics calculator for planets, moons, and near earth objects
 - ability to configure planets and orbits as needed in a JSON file
+- can be used to calculate the distance between any two planets and the closest approach date
 
 ## To Install
 Install the following libraries:
