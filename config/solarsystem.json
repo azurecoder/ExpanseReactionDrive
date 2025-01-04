@@ -1,0 +1,54 @@
+{
+    "stars": [
+        {
+            "name": "Sol",
+            "mass": 1.0,
+            "type": "G",
+            "AU": 149597879
+        }
+    ],
+    "planets": [
+        {
+            "name": "Earth",
+            "mass": 1.0,
+            "radius": 1.0,
+            "type": "TERRESTRIAL",
+            "orbit": {
+                "eccentricity": 0.0167,
+                "semi_major_axis": 1.0,
+                "perihelion_day": 3.0,
+                "perihelion_year": 2024,
+                "period": 365,
+                "star": "Sol"
+            }
+        },
+        {
+            "name": "Mars",
+            "mass": 0.107,
+            "radius": 0.532,
+            "type": "TERRESTRIAL",
+            "orbit": {
+                "eccentricity": 0.0934,
+                "semi_major_axis": 1.524,
+                "perihelion_day": 129.0,
+                "perihelion_year": 2024,
+                "period": 687,
+                "star": "Sol"
+            }
+        },
+        {
+            "name": "Jupiter",
+            "mass": 317.8,
+            "radius": 11.21,
+            "type": "GAS_GIANT",
+            "orbit": {
+                "eccentricity": 0.0489,
+                "semi_major_axis": 5.204,
+                "perihelion_day": 17.0,
+                "perihelion_year": 2024,
+                "period": 4332,
+                "star": "Sol"
+            }
+        }
+    ]
+}

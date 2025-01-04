@@ -1,20 +1,14 @@
-from StarType import EllipticalOrbit
-from Sol import Sol, Earth
-import math
+from Config import load_from_json
 
 if __name__ == "__main__":
-    sol = Sol()
-    earth_orbit = EllipticalOrbit(0.0167, 1.0, 3.0, 2024, 365, sol)
-    mars_orbit = EllipticalOrbit(0.0934, 1.524, 129.0, 2024, 687, sol)
-    earth = Earth(earth_orbit)  
-    mars = Earth(mars_orbit)  
-    # Get all of the details for Earth 
-    print("Details for Earth: ---->")
-    print(f"Closest approach to Sun: {earth.get_closest_approach()}")
-    print(f"Farthest approach from Sun: {earth.get_farthest_approach()}")
-    print(f"Orbital distance in km on 5th of Feb: {int(round(earth.get_orbital_distance(36.0, 2025) * Sol.AU_IN_KM, 0)): ,} km") # February 5th
-    print("Details for Mars: ---->")
-    print(f"Closest approach to Sun: {mars.get_closest_approach()}")
-    print(f"Farthest approach from Sun: {mars.get_farthest_approach()}")
-    print(f"Orbital distance in km on 5th of Feb: {int(round(mars.get_orbital_distance(36.0, 2025) * Sol.AU_IN_KM, 0)): ,} km") # February 5th
+    stars, planets = load_from_json("./config/solarsystem.json")
 
+    for planet in planets:
+        print(f"Details for {planet.name}: ---->")
+        closest = planet.get_closest_approach()
+        farthest = planet.get_farthest_approach()
+        orbital_distance = planet.get_orbital_distance(36.0, 2025)
+
+        print(f"Closest approach to {planet.star.name}: {closest} and in km: {int(round(closest[2] * planet.star.au_in_km, 0)): ,} km")
+        print(f"Farthest approach from {planet.star.name}: {farthest} and in km: {int(round(farthest[2] * planet.star.au_in_km, 0)): ,} km")
+        print(f"Orbital distance in km on 5th of Feb: {int(round(orbital_distance * planet.star.au_in_km, 0)): ,} km")
