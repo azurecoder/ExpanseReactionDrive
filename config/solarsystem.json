@@ -77,6 +77,48 @@
                 "period": 4332,
                 "star": "Sol"
             }
+        },
+        {
+            "name": "Saturn",
+            "mass": 95.2,
+            "radius": 9.45,
+            "type": "GAS_GIANT",
+            "orbit": {
+                "eccentricity": 0.0565,
+                "semi_major_axis": 9.582,
+                "perihelion_day": 90.0,
+                "perihelion_year": 2024,
+                "period": 10759,
+                "star": "Sol"
+            }
+        },
+        {
+            "name": "Uranus",
+            "mass": 14.5,
+            "radius": 4.01,
+            "type": "ICE_GIANT",
+            "orbit": {
+                "eccentricity": 0.0463,
+                "semi_major_axis": 19.191,
+                "perihelion_day": 84.0,
+                "perihelion_year": 2024,
+                "period": 30687,
+                "star": "Sol"
+            }
+        },
+        {
+            "name": "Neptune",
+            "mass": 17.1,
+            "radius": 3.88,
+            "type": "ICE_GIANT",
+            "orbit": {
+                "eccentricity": 0.0097,
+                "semi_major_axis": 30.07,
+                "perihelion_day": 66.0,
+                "perihelion_year": 2024,
+                "period": 60190,
+                "star": "Sol"
+            }
         }
     ]
 }
