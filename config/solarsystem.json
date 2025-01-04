@@ -9,6 +9,34 @@
     ],
     "planets": [
         {
+            "name": "Mercury",
+            "mass": 0.055,
+            "radius": 0.38,
+            "type": "TERRESTRIAL",
+            "orbit": {
+                "eccentricity": 0.2056,
+                "semi_major_axis": 0.387,
+                "perihelion_day": 309.0,
+                "perihelion_year": 2024,
+                "period": 87.97,
+                "star": "Sol"
+            }
+        },
+        {
+            "name": "Venus",
+            "mass": 0.815,
+            "radius": 0.95,
+            "type": "TERRESTRIAL",
+            "orbit": {
+                "eccentricity": 0.0067,
+                "semi_major_axis": 0.723,
+                "perihelion_day": 192.0,
+                "perihelion_year": 2024,
+                "period": 225,
+                "star": "Sol"
+            }
+        },
+        {
             "name": "Earth",
             "mass": 1.0,
             "radius": 1.0,
