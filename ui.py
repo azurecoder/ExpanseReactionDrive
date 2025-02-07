@@ -3,6 +3,9 @@ import pygame
 from lib import PlanetType, EllipticalOrbit, Planet
 import Config as cf
 
+screen_radius = 1130
+planet_radius = 14
+
 stars, planets = cf.load_from_json("./config/solarsystem.json")
 mercury = [p for p in planets if p.name == "Mercury"][0].get_farthest_approach()[2] * 1 
 venus = [p for p in planets if p.name == "Venus"][0].get_farthest_approach()[2] * 2 
@@ -12,18 +15,23 @@ jupiter = [p for p in planets if p.name == "Jupiter"][0].get_farthest_approach()
 saturn = [p for p in planets if p.name == "Saturn"][0].get_farthest_approach()[2] * 6 
 uranus = [p for p in planets if p.name == "Uranus"][0].get_farthest_approach()[2] * 7 
 neptune = [p for p in planets if p.name == "Neptune"][0].get_farthest_approach()[2] * 8 
-mercury = (mercury / neptune) * 580
-venus = (venus / neptune) * 580
-earth = (earth / neptune) * 580
-mars = (mars / neptune) * 580   
-jupiter = (jupiter / neptune) * 580
-saturn = (saturn / neptune) * 580
-uranus = (uranus / neptune) * 580
-neptune = (neptune / neptune) * 580
+mercury = (mercury / neptune) * screen_radius
+venus = (venus / neptune) * screen_radius
+earth = (earth / neptune) * screen_radius
+mars = (mars / neptune) * screen_radius
+jupiter = (jupiter / neptune) * screen_radius
+saturn = (saturn / neptune) * screen_radius
+uranus = (uranus / neptune) * screen_radius
+neptune = (neptune / neptune) * screen_radius
 
-planets = [mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
-print(planets)
-"""
+planet_radius_constant = (planet_radius-2) / [p for p in planets if p.name == "Jupiter"][0].radius
+
+planets_distances = [mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
+colours = [(139, 69, 19), (120, 60, 59), (101, 51, 99), (83, 42, 139), (64, 32, 179), (45, 23, 219), (27, 14, 239), (0, 0, 255)]
+plant_radii = [p.radius * (planet_radius_constant+2) for p in planets]
+
+icons = [f"./media/{p.name.lower()}.png" for p in planets]
+
 # Initialize pygame
 pygame.init()
 
@@ -38,8 +46,9 @@ black = (0, 0, 0)
 green = (0, 255, 0)
 
 # Circle properties
-circle_radius = 5
-circle_pos = (width // 2, height // 2)
+circle_radius = 10
+# circle_pos = (width // 2, height // 2)
+circle_pos = (0, height // 2)
 
 # Main loop
 running = True
@@ -50,10 +59,15 @@ while running:
 
     screen.fill(black)
     pygame.draw.circle(screen, yellow, circle_pos, circle_radius)
-    for i, p in enumerate(planets):
-        pygame.draw.circle(screen, green, (int(width // 2 + p), height // 2), 5)
+    # for i, p in enumerate(planets_distances):
+    planet_images = [pygame.transform.scale(pygame.image.load(icon), (int(plant_radii[i] * 2), int(plant_radii[i] * 2)))
+                     for i, icon in enumerate(icons)]
+    for i, p in enumerate(planets_distances):
+        screen.blit(planet_images[i],
+                    (p + (circle_radius + 5) - plant_radii[i], height // 2 - plant_radii[i]))
+
+        #pygame.draw.circle(screen, colours[i], (int(width // 2 + p)+(circle_radius+5), height // 2), plant_radii[i])
     pygame.display.flip()
 
 pygame.quit()
 sys.exit()
-"""
