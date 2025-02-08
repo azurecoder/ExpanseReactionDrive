@@ -59,14 +59,28 @@ while running:
 
     screen.fill(black)
     pygame.draw.circle(screen, yellow, circle_pos, circle_radius)
-    # for i, p in enumerate(planets_distances):
+    
     planet_images = [pygame.transform.scale(pygame.image.load(icon), (int(plant_radii[i] * 2), int(plant_radii[i] * 2)))
                      for i, icon in enumerate(icons)]
     for i, p in enumerate(planets_distances):
-        screen.blit(planet_images[i],
-                    (p + (circle_radius + 5) - plant_radii[i], height // 2 - plant_radii[i]))
-
-        #pygame.draw.circle(screen, colours[i], (int(width // 2 + p)+(circle_radius+5), height // 2), plant_radii[i])
+        screen.blit(planet_images[i], (p + (circle_radius + 5) - plant_radii[i], height // 2 - plant_radii[i]))
+        # Display tooltips when hovering over planet images
+        mouse_pos = pygame.mouse.get_pos()
+        font = pygame.font.SysFont(None, 24)
+        for i, distance in enumerate(planets_distances):
+            x = distance + (circle_radius + 5) - plant_radii[i]
+            y = height // 2 - plant_radii[i]
+            rect = pygame.Rect(x, y, int(plant_radii[i] * 2), int(plant_radii[i] * 2))
+            if rect.collidepoint(mouse_pos):
+                tooltip_surface = font.render(f"{planets[i].name} [{planets[i].get_farthest_approach()[2]:.2f} AU]", True, green)
+                tooltip_rect = tooltip_surface.get_rect()
+                pos_x = mouse_pos[0] + 10
+                tooltip_rect.topleft = (pos_x, mouse_pos[1] + 10)
+                if planets[i].name == "Neptune":
+                    mouse_pos = (mouse_pos[0] - 110, mouse_pos[1])
+                tooltip_rect = tooltip_surface.get_rect()
+                tooltip_rect.topleft = (mouse_pos[0] + 10, mouse_pos[1] + 10)
+                screen.blit(tooltip_surface, tooltip_rect)
     pygame.display.flip()
 
 pygame.quit()
