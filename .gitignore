@@ -168,3 +168,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Mac and PyCharm locations
+.DS_Store
+.idea/
