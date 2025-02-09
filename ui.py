@@ -3,6 +3,16 @@ import pygame
 from lib import PlanetType, EllipticalOrbit, Planet
 import Config as cf
 
+# New variables and constants for the destination click behavior
+AU_TO_KM = 149597870.7
+final_tooltip_text = None
+
+# Persistent state for planet selections
+selected_planet_index = None
+destination_planet_index = None
+drag_start_x = None
+drag_line_y = None
+
 screen_radius = 1130
 planet_radius = 14
 
@@ -60,27 +70,67 @@ while running:
     screen.fill(black)
     pygame.draw.circle(screen, yellow, circle_pos, circle_radius)
     
+    # First, draw all planet images and store their positions
     planet_images = [pygame.transform.scale(pygame.image.load(icon), (int(plant_radii[i] * 2), int(plant_radii[i] * 2)))
                      for i, icon in enumerate(icons)]
-    for i, p in enumerate(planets_distances):
-        screen.blit(planet_images[i], (p + (circle_radius + 5) - plant_radii[i], height // 2 - plant_radii[i]))
-        # Display tooltips when hovering over planet images
-        mouse_pos = pygame.mouse.get_pos()
-        font = pygame.font.SysFont(None, 24)
-        for i, distance in enumerate(planets_distances):
-            x = distance + (circle_radius + 5) - plant_radii[i]
-            y = height // 2 - plant_radii[i]
-            rect = pygame.Rect(x, y, int(plant_radii[i] * 2), int(plant_radii[i] * 2))
+    planet_positions = []
+    for i, distance in enumerate(planets_distances):
+        x = distance + (circle_radius + 5) - plant_radii[i]
+        y = height // 2 - plant_radii[i]
+        planet_positions.append((x, y))
+        screen.blit(planet_images[i], (x, y))
+
+    mouse_pos = pygame.mouse.get_pos()
+    font = pygame.font.SysFont(None, 24)
+    for i, (x, y) in enumerate(planet_positions):
+        rect = pygame.Rect(x, y, int(plant_radii[i] * 2), int(plant_radii[i] * 2))
+        if rect.collidepoint(mouse_pos):
+            tooltip_surface = font.render(f"{planets[i].name} [{planets[i].get_farthest_approach()[2]:.2f} AU]", True, green)
+            tooltip_rect = tooltip_surface.get_rect()
+            tooltip_rect.topleft = (mouse_pos[0] + 10, mouse_pos[1] + 10)
+            screen.blit(tooltip_surface, tooltip_rect)
+
+        if pygame.mouse.get_pressed()[0]:
             if rect.collidepoint(mouse_pos):
-                tooltip_surface = font.render(f"{planets[i].name} [{planets[i].get_farthest_approach()[2]:.2f} AU]", True, green)
-                tooltip_rect = tooltip_surface.get_rect()
-                pos_x = mouse_pos[0] + 10
-                tooltip_rect.topleft = (pos_x, mouse_pos[1] + 10)
-                if planets[i].name == "Neptune":
-                    mouse_pos = (mouse_pos[0] - 110, mouse_pos[1])
-                tooltip_rect = tooltip_surface.get_rect()
-                tooltip_rect.topleft = (mouse_pos[0] + 10, mouse_pos[1] + 10)
-                screen.blit(tooltip_surface, tooltip_rect)
+                if selected_planet_index is None:
+                    selected_planet_index = i
+                    drag_start_x = mouse_pos[0]
+                    drag_line_y = y + plant_radii[i]
+                elif selected_planet_index is not None and selected_planet_index != i:
+                    destination_planet_index = i
+                    distance_val = abs(planets_distances[selected_planet_index] - planets_distances[destination_planet_index])
+                    tooltip_text = f"{planets[selected_planet_index].name} -> {planets[i].name}: {distance_val:.2f} AU"
+                    tooltip_surface = font.render(tooltip_text, True, green)
+                    screen.blit(tooltip_surface, (mouse_pos[0] + 10, mouse_pos[1] + 10))
+        # Always keep the red circle overlays on the selected and destination planets
+        if selected_planet_index == i:
+            pygame.draw.circle(screen, (255, 0, 0), (x + plant_radii[i], y + plant_radii[i]), 6, 0)
+        if destination_planet_index == i:
+            pygame.draw.circle(screen, (255, 0, 0), (x + plant_radii[i], y + plant_radii[i]), 6, 0)
+
+    # Draw the red line: if a planet is selected, always draw the red line.
+    if selected_planet_index is not None and drag_start_x is not None:
+        if destination_planet_index is None:
+            # line follows the mouse position
+            current_x = pygame.mouse.get_pos()[0]
+            end_x = current_x
+        else:
+            # line points to the center of the destination planet
+            dest_x, dest_y = planet_positions[destination_planet_index]
+            end_x = dest_x + plant_radii[destination_planet_index]
+        pygame.draw.line(screen, (255, 0, 0), (drag_start_x, drag_line_y), (end_x, drag_line_y), 2)
+        
+        # If destination planet is selected, add distance text in white at the middle of the red line.
+        if destination_planet_index is not None:
+            # Calculate the closest distance in AU, convert to km using AU_TO_KM.
+            distance_au = planets[selected_planet_index].find_closest_distance(planets[destination_planet_index])
+            distance_km = int(distance_au[0]) * AU_TO_KM
+            distance_text = f"{distance_km:,.0f} km"
+            text_surface = font.render(distance_text, True, (255, 255, 255))
+            mid_x = (drag_start_x + end_x) // 2
+            mid_y = drag_line_y - text_surface.get_height() - 5
+            screen.blit(text_surface, (mid_x, mid_y))
+
     pygame.display.flip()
 
 pygame.quit()
