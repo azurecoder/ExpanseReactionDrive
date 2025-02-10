@@ -1,4 +1,5 @@
 import sys
+
 import pygame
 from lib import PlanetType, EllipticalOrbit, Planet
 import Config as cf
@@ -15,6 +16,24 @@ drag_line_y = None
 
 screen_radius = 1130
 planet_radius = 14
+
+# Define the Clear button drawing and event handling functions
+def draw_clear_button(surface):
+    button_rect = pygame.Rect(surface.get_width() - 110, 10, 100, 40)
+    pygame.draw.rect(surface, (200, 200, 200), button_rect)
+    font = pygame.font.SysFont(None, 24)
+    text_surface = font.render("Clear", True, (0, 0, 0))
+    text_rect = text_surface.get_rect(center=button_rect.center)
+    surface.blit(text_surface, text_rect)
+    return button_rect
+
+def handle_clear_button_event(event, button_rect):
+    global selected_planet_index, destination_planet_index, drag_start_x, drag_line_y
+    if event.type == pygame.MOUSEBUTTONDOWN and button_rect.collidepoint(event.pos):
+        selected_planet_index = None
+        destination_planet_index = None
+        drag_start_x = None
+        drag_line_y = None
 
 stars, planets = cf.load_from_json("./config/solarsystem.json")
 mercury = [p for p in planets if p.name == "Mercury"][0].get_farthest_approach()[2] * 1 
@@ -59,15 +78,18 @@ green = (0, 255, 0)
 circle_radius = 10
 # circle_pos = (width // 2, height // 2)
 circle_pos = (0, height // 2)
-
+# button_rect will be computed each frame
 # Main loop
 running = True
 while running:
+    button_rect = pygame.Rect(screen.get_width() - 110, 10, 100, 40)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+        handle_clear_button_event(event, button_rect)
     screen.fill(black)
+    button_rect = draw_clear_button(screen)
+    pygame.draw.circle(screen, yellow, circle_pos, circle_radius)
     pygame.draw.circle(screen, yellow, circle_pos, circle_radius)
     
     # First, draw all planet images and store their positions
@@ -87,8 +109,11 @@ while running:
         if rect.collidepoint(mouse_pos):
             tooltip_surface = font.render(f"{planets[i].name} [{planets[i].get_farthest_approach()[2]:.2f} AU]", True, green)
             tooltip_rect = tooltip_surface.get_rect()
+            if planets[i].name == "Neptune":
+                mouse_pos = (mouse_pos[0] - 110, mouse_pos[1])
             tooltip_rect.topleft = (mouse_pos[0] + 10, mouse_pos[1] + 10)
             screen.blit(tooltip_surface, tooltip_rect)
+            mouse_pos = pygame.mouse.get_pos()
 
         if pygame.mouse.get_pressed()[0]:
             if rect.collidepoint(mouse_pos):
