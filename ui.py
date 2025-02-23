@@ -109,8 +109,8 @@ while running:
         if rect.collidepoint(mouse_pos):
             tooltip_surface = font.render(f"{planets[i].name} [{planets[i].get_farthest_approach()[2]:.2f} AU]", True, green)
             tooltip_rect = tooltip_surface.get_rect()
-            if planets[i].name == "Neptune":
-                mouse_pos = (mouse_pos[0] - 110, mouse_pos[1])
+            #if planets[i].name == "Neptune":
+            #    mouse_pos = (mouse_pos[0] - 110, mouse_pos[1])
             tooltip_rect.topleft = (mouse_pos[0] + 10, mouse_pos[1] + 10)
             screen.blit(tooltip_surface, tooltip_rect)
             mouse_pos = pygame.mouse.get_pos()
